@@ -62,7 +62,7 @@ const App = () => {
         <CameraControls target={[0, 0, 0]} />
         <directionalLight position={[-10, 20, 40]} />
         <directionalLight position={[2, -3, -4]} />
-        <Snake position={[-Math.sqrt(2)*2-0.5,Math.sqrt(2)/4,0]} segments={8} rotation={[Math.pi,0,-Math.pi/4]}/>
+        <Snake position={[-Math.sqrt(2)*3.5-0.5,Math.sqrt(2)/4,0]} segments={16} rotation={[Math.pi,0,-Math.pi/4]}/>
         <InfiniteGridHelper color={new THREE.Color(0x00ccff)} />
 
       </Canvas>

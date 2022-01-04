@@ -13,7 +13,6 @@ const Snake = ({ segments, index = 0, ...props }) => {
           ref.current.rotateY( Math.pi/20 );
           ref.current.amountToAnimate -= Math.pi/20;
       }
-
   });
 
   const handleClick = (e, r) => {
