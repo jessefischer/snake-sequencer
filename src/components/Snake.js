@@ -4,21 +4,15 @@ import { useFrame } from "@react-three/fiber";
 import * as Math from "mathjs";
 import SnakeSegment from "./SnakeSegment";
 
-const Snake = ({ segments, ...props }) => {
+const Snake = ({ segments, index = 0, ...props }) => {
   const ref = useRef();
-  const ref2 = useRef();
   const [rotation, setRotation] = useState(0);
-
 
   useFrame(() => {
       if ( ref.current.amountToAnimate > 0 ) {
           ref.current.rotateY( Math.pi/20 );
           ref.current.amountToAnimate -= Math.pi/20;
       }
-      if ( ref2.current.amountToAnimate > 0 ) {
-        ref2.current.rotateY( Math.pi/20 );
-        ref2.current.amountToAnimate -= Math.pi/20;
-    }
 
   });
 
@@ -34,20 +28,11 @@ const Snake = ({ segments, ...props }) => {
 
   return (
     <group ref={ref} onClick={(e) => handleClick(e, ref)} {...props}>
-      <SnakeSegment color="#008000" />
+      <SnakeSegment color={index % 2 ? "#008000" : "#808080"} />
       <group rotation={[0, Math.pi, Math.pi / 2]}>
-        <group
-          ref={ref2}
-          position={[0.5, 0.5, 0]}
-          onClick={(e) => handleClick(e, ref2)}
-        >
-          <SnakeSegment color="#808080" />
-          {segments >= 2 && (
-            <group rotation={[0, Math.pi, Math.pi / 2]}>
-              <Snake position={[0.5, 0.5, 0]} segments={segments - 2} />
-            </group>
-          )}
-        </group>
+        {segments > 1 && (
+          <Snake position={[0.5, 0.5, 0]} index={index + 1} segments={segments - 1} />
+        )}
       </group>
     </group>
   );
