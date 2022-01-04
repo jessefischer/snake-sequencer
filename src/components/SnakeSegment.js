@@ -1,12 +1,11 @@
 import React, { useState, useRef } from "react";
-import { useThree } from "@react-three/fiber";
 
-import * as Math from "mathjs";
+// import * as Math from "mathjs";
 import * as THREE from "three";
 
 const SnakeSegment = ({ color, inverted = false, ...props }) => {
   const ref = useRef();
-  const [rotation, setRotation] = useState(0);
+  // const [rotation, setRotation] = useState(0);
 
   // const handleClick = (e) => {
   //   ref.current.rotateY(Math.pi / 2); // 90 degrees
