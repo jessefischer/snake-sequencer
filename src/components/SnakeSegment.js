@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useRef } from "react";
 
 // import * as Math from "mathjs";
 import * as THREE from "three";
