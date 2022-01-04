@@ -8,6 +8,7 @@ import InfiniteGridHelper from "./lib/InfiniteGridHelper";
 import "./App.css";
 
 import Snake from "./components/Snake";
+import SnakeSequencer from "./components/SnakeSequencer";
 // import Controls from "./components/Controls";
 
 import * as Math from "mathjs";
@@ -51,7 +52,7 @@ const App = () => {
   // };
 
   return (
-    <>
+    <SnakeSequencer>
       <Canvas
         camera={{
           position: [0,5, 10],
@@ -67,11 +68,12 @@ const App = () => {
       </Canvas>
 
       <div className="source">
-        <a href="https://github.com/jessefischer/react-three-golden-rectangles">
+        <a href="https://github.com/jessefischer/rubiks-snake">
           Source / Credits
         </a>
       </div>
-    </>
+
+    </SnakeSequencer>
   );
 };
 
