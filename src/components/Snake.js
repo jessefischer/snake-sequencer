@@ -13,15 +13,28 @@ const Snake = ({ segments, index = 0, ...props }) => {
           ref.current.rotateY( Math.pi/20 );
           ref.current.amountToAnimate -= Math.pi/20;
       }
+      else if ( ref.current.amountToAnimate < 0) {
+        ref.current.rotateY( -Math.pi/20 );
+        ref.current.amountToAnimate += Math.pi/20;
+    }
   });
 
   const handleClick = (e, r) => {
-      // if (e.shiftKey) ...
-      if ( !r.current.amountToAnimate || r.current.amountToAnimate <=0 )
-      r.current.amountToAnimate = Math.pi / 2;
+      if ( !r.current.amountToAnimate || r.current.amountToAnimate !==0 ) {
 
-    //r.current.rotateY(Math.pi / 2); // 90 degrees
-    setRotation((rotation + 1) % 4);
+      if (e.shiftKey) {
+        r.current.amountToAnimate = -Math.pi / 2;
+        setRotation(((rotation - 1) + 4) % 4);
+
+      }
+      else {
+        r.current.amountToAnimate = Math.pi / 2;
+        //r.current.rotateY(Math.pi / 2); // 90 degrees
+        setRotation((rotation + 1) % 4);    
+      }
+
+    }
+
     e.stopPropagation();
   };
 
