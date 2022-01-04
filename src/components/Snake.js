@@ -1,5 +1,4 @@
 import React, { useState, useRef } from "react";
-import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
 
 import * as Math from "mathjs";
