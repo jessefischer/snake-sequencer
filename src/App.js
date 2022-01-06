@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Canvas, useFrame, useThree, extend } from "@react-three/fiber";
 import * as THREE from "three";
 
@@ -8,16 +8,11 @@ import InfiniteGridHelper from "./lib/InfiniteGridHelper";
 import "./App.css";
 
 import Snake from "./components/Snake";
-import SnakeSequencer from "./components/SnakeSequencer";
-// import Controls from "./components/Controls";
 
+import * as Tone from "tone";
 import * as Math from "mathjs";
 
 extend({ OrbitControls });
-
-// const ICO_START_OPACITY = 0;
-// const RECT_START_OPACITY = 1;
-// const START_SPIN_SPEED = 0.5;
 
 // From https://codeworkshop.dev/blog/2020-04-03-adding-orbit-controls-to-react-three-fiber/
 const CameraControls = ({ target = [0, 0, 0] }) => {
@@ -35,45 +30,70 @@ const CameraControls = ({ target = [0, 0, 0] }) => {
 };
 
 const App = () => {
-  // const [icoOpacity, setIcoOpacity] = useState(ICO_START_OPACITY);
-  // const [rectOpacity, setRectOpacity] = useState(RECT_START_OPACITY);
-  // const [spinSpeed, setSpinSpeed] = useState(START_SPIN_SPEED);
+  const [started, setStarted] = useState(false);
+  const [playing, setPlaying] = useState(false);
+  const [seqPosition, setSeqPosition] = useState(0);
+  const [bpm] = useState(120);
 
-  // const handleUpdateControls = (e) => {
-  //   if (e.target.name === "icosahedronOpacity") {
-  //     setIcoOpacity(e.target.value);
-  //   }
-  //   if (e.target.name === "rectanglesOpacity") {
-  //     setRectOpacity(e.target.value);
-  //   }
-  //   if (e.target.name === "spinSpeed") {
-  //     setSpinSpeed(e.target.value);
-  //   }
-  // };
+  const synth = useRef(new Tone.Synth().toDestination());
+
+  const notes = ["C3", "D3", "E3", "F3", "G3", "G#3", "A3", "B3", "C4", "D4", "E4", "F4", "G4", "G#4", "A4", "B4"];
+
+  useEffect(() => {
+    new Tone.Sequence((time, note) => {
+      synth.current.triggerAttackRelease(note, 0.1, time);
+      const [bars, beats] = Tone.Transport.position.split(":");
+      setSeqPosition( (Number( bars % Math.floor( notes.length / 4)) * 4)  + Number( beats ) );
+    }, notes, "4n").start(0);
+  }, [notes]);
+
+  useEffect(() => {
+    Tone.Transport.bpm.value = bpm * 2;
+  }, [bpm]);
+
+  const handleStopStart = () => {
+    if (!started) {
+      setStarted(true);
+      Tone.start();
+    }
+    if (!playing) {
+      setPlaying(true);
+      Tone.Transport.start();
+    } else {
+      setPlaying(false);
+      Tone.Transport.stop();
+    }
+  };
 
   return (
-    <SnakeSequencer>
+    <>
       <Canvas
         camera={{
-          position: [0,5, 10],
+          position: [0, 5, 10],
         }}
       >
         <CameraControls target={[0, 0, 0]} />
         <ambientLight />
         <directionalLight position={[-10, 20, 40]} />
         <directionalLight position={[2, -3, -4]} />
-        <Snake position={[-Math.sqrt(2)*3.5-0.5,Math.sqrt(2)/4 + 4,0]} segments={24} rotation={[Math.pi,0,-Math.pi/4]}/>
+        <Snake
+          position={[-Math.sqrt(2) * 3.5 - 0.5, Math.sqrt(2) / 4 + 4, 0]}
+          segments={16}
+          index={0}
+          rotation={[Math.pi, 0, -Math.pi / 4]}
+          seqPosition={seqPosition}
+        />
         <InfiniteGridHelper color={new THREE.Color(0x00ccff)} />
-
       </Canvas>
-
       <div className="source">
         <a href="https://github.com/jessefischer/rubiks-snake">
           Source / Credits
         </a>
       </div>
-
-    </SnakeSequencer>
+      <div className="controls" onClick={handleStopStart}>
+        {playing ? "stop" : "start"}
+      </div>
+    </>
   );
 };
 
