@@ -37,15 +37,16 @@ const App = () => {
 
   const synth = useRef(new Tone.Synth().toDestination());
 
-  const notes = ["C3", "D3", "E3", "F3", "G3", "G#3", "A3", "B3", "C4", "D4", "E4", "F4", "G4", "G#4", "A4", "B4"];
-
+  
   useEffect(() => {
+    const notes = ["C4", "D4", "E4", "F4", "G4", "G#4", "A4", "B4", "C5", "B4", "A4", "G#4", "G4", "F4", "E4", "D4"];
+
     new Tone.Sequence((time, note) => {
       synth.current.triggerAttackRelease(note, 0.1, time);
       const [bars, beats] = Tone.Transport.position.split(":");
       setSeqPosition( (Number( bars % Math.floor( notes.length / 4)) * 4)  + Number( beats ) );
     }, notes, "4n").start(0);
-  }, [notes]);
+  }, []);
 
   useEffect(() => {
     Tone.Transport.bpm.value = bpm * 2;
