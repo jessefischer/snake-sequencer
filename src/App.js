@@ -32,24 +32,37 @@ const CameraControls = ({ target = [0, 0, 0] }) => {
 const App = () => {
   const [started, setStarted] = useState(false);
   const [playing, setPlaying] = useState(false);
-  const [seqPosition, setSeqPosition] = useState(0);
   const [bpm] = useState(120);
+  const [root] = useState(60);
 
-  const synth = useRef(new Tone.Synth().toDestination());
+  const synth = useRef();
+  const [index, setIndex] = useState(0);
 
-  
+  const [sequence, setSequence] = useState(Array(16).fill(0));
+
   useEffect(() => {
-    const notes = ["C4", "D4", "E4", "F4", "G4", "G#4", "A4", "B4", "C5", "B4", "A4", "G#4", "G4", "F4", "E4", "D4"];
-
-    new Tone.Sequence((time, note) => {
-      synth.current.triggerAttackRelease(note, 0.1, time);
-      const [bars, beats] = Tone.Transport.position.split(":");
-      setSeqPosition( (Number( bars % Math.floor( notes.length / 4)) * 4)  + Number( beats ) );
-    }, notes, "4n").start(0);
+    synth.current = new Tone.Synth().toDestination();
   }, []);
 
   useEffect(() => {
-    Tone.Transport.bpm.value = bpm * 2;
+    const loop = new Tone.Sequence(
+      (time, i) => {
+        synth.current.triggerAttackRelease(
+          Tone.Frequency(root + sequence[i], "midi").toFrequency(),
+          0.1,
+          time
+        );
+        setIndex(i);
+      },
+      [...Array(sequence.length).keys()],
+      "8n"
+    );
+    loop.start(0);
+    return () => loop.dispose();
+  }, [sequence, root]);
+
+  useEffect(() => {
+    Tone.Transport.bpm.value = bpm;
   }, [bpm]);
 
   const handleStopStart = () => {
@@ -64,6 +77,14 @@ const App = () => {
       setPlaying(false);
       Tone.Transport.stop();
     }
+  };
+
+  const handleUpdateSequence = (index, delta) => {
+    const newSequence = sequence.slice();
+    for (let i = index; i < newSequence.length; i++) {
+      newSequence[i] += delta;
+    }
+    setSequence(newSequence);
   };
 
   return (
@@ -82,7 +103,8 @@ const App = () => {
           segments={16}
           index={0}
           rotation={[Math.pi, 0, -Math.pi / 4]}
-          seqPosition={seqPosition}
+          seqPosition={index}
+          handleUpdateSequence={handleUpdateSequence}
         />
         <InfiniteGridHelper color={new THREE.Color(0x00ccff)} />
       </Canvas>
