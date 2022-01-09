@@ -32,6 +32,10 @@ const App = () => {
     synth.current = new Tone.Synth().toDestination();
   }, []);
 
+  // useEffect(() => {
+  //   window.addEventListener( "keydown", handleKeyDown );
+  // }, [playing]);
+
   useEffect(() => {
     const loop = new Tone.Sequence(
       (time, i) => {
@@ -78,15 +82,22 @@ const App = () => {
     setSequence(newSequence);
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === " ") {
+      handleStopStart();
+    }
+  }
+
   return (
     <>
       <Canvas
         camera={{
           position: [0, 5, 10],
         }}
+        
       >
         {/* <CameraControls target={[0, 0, 0]} /> */}
-        <OrbitControls />
+        {/* <OrbitControls /> */}
         <ambientLight />
         <directionalLight position={[-10, 20, 40]} />
         <directionalLight position={[2, -3, -4]} />
