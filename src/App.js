@@ -1,44 +1,32 @@
 import { useRef, useState, useEffect } from "react";
-import { Canvas, useFrame, useThree, extend } from "@react-three/fiber";
+import { Canvas } from "@react-three/fiber";
+import { OrbitControls } from "@react-three/drei";
+import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import * as THREE from "three";
 
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+// import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import InfiniteGridHelper from "./lib/InfiniteGridHelper";
+import Tonality from "./lib/tonality";
 
 import "./App.css";
 
 import Snake from "./components/Snake";
 
 import * as Tone from "tone";
-import * as Math from "mathjs";
-
-extend({ OrbitControls });
-
-// From https://codeworkshop.dev/blog/2020-04-03-adding-orbit-controls-to-react-three-fiber/
-const CameraControls = ({ target = [0, 0, 0] }) => {
-  const {
-    camera,
-    gl: { domElement },
-  } = useThree();
-  const controls = useRef();
-  useFrame(() => {
-    controls.current.update();
-  });
-  return (
-    <orbitControls ref={controls} args={[camera, domElement]} target={target} />
-  );
-};
 
 const App = () => {
   const [started, setStarted] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [bpm] = useState(120);
   const [root] = useState(60);
+  const [tonality] = useState( Tonality.Pentatonic );
 
   const synth = useRef();
   const [index, setIndex] = useState(0);
 
+  const [rotations, setRotations] = useState( Array(16).fill(0));
   const [sequence, setSequence] = useState(Array(16).fill(0));
+
 
   useEffect(() => {
     synth.current = new Tone.Synth().toDestination();
@@ -48,7 +36,7 @@ const App = () => {
     const loop = new Tone.Sequence(
       (time, i) => {
         synth.current.triggerAttackRelease(
-          Tone.Frequency(root + sequence[i], "midi").toFrequency(),
+          tonality.freq( sequence[i] ),
           0.1,
           time
         );
@@ -59,7 +47,7 @@ const App = () => {
     );
     loop.start(0);
     return () => loop.dispose();
-  }, [sequence, root]);
+  }, [sequence, root, tonality]);
 
   useEffect(() => {
     Tone.Transport.bpm.value = bpm;
@@ -79,10 +67,13 @@ const App = () => {
     }
   };
 
-  const handleUpdateSequence = (index, delta) => {
+  const handleUpdateSequence = (index, rotation) => {
+    const newRotations = rotations.slice();
     const newSequence = sequence.slice();
-    for (let i = index; i < newSequence.length; i++) {
-      newSequence[i] += delta;
+      newRotations[index] = rotation;
+    setRotations(newRotations);
+    for (let i = 1; i < newRotations.length; i++ ) {
+      newSequence[i] = newSequence[i-1] + newRotations[i];
     }
     setSequence(newSequence);
   };
@@ -94,7 +85,8 @@ const App = () => {
           position: [0, 5, 10],
         }}
       >
-        <CameraControls target={[0, 0, 0]} />
+        {/* <CameraControls target={[0, 0, 0]} /> */}
+        <OrbitControls />
         <ambientLight />
         <directionalLight position={[-10, 20, 40]} />
         <directionalLight position={[2, -3, -4]} />
@@ -102,11 +94,14 @@ const App = () => {
           position={[-Math.sqrt(2) * 3.5 - 0.5, Math.sqrt(2) / 4 + 4, 0]}
           segments={16}
           index={0}
-          rotation={[Math.pi, 0, -Math.pi / 4]}
+          rotation={[Math.PI, 0, -Math.PI / 4]}
           seqPosition={index}
           handleUpdateSequence={handleUpdateSequence}
         />
-        <InfiniteGridHelper color={new THREE.Color(0x00ccff)} />
+        <InfiniteGridHelper layers={1} color={new THREE.Color(0x00ccff)} />
+        <EffectComposer >
+        <Bloom luminanceThreshold={0.35} luminanceSmoothing={0.9} height={400} />
+        </EffectComposer>
       </Canvas>
       <div className="source">
         <a href="https://github.com/jessefischer/rubiks-snake">
