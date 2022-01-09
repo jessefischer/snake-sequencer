@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
-import { EffectComposer, Bloom } from '@react-three/postprocessing'
+import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import * as THREE from "three";
 
 // import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
@@ -19,14 +19,13 @@ const App = () => {
   const [playing, setPlaying] = useState(false);
   const [bpm] = useState(120);
   const [root] = useState(60);
-  const [tonality] = useState( Tonality.Pentatonic );
+  const [tonality] = useState(Tonality.Pentatonic);
 
   const synth = useRef();
   const [index, setIndex] = useState(0);
 
-  const [rotations, setRotations] = useState( Array(16).fill(0));
+  const [rotations, setRotations] = useState(Array(16).fill(0));
   const [sequence, setSequence] = useState(Array(16).fill(0));
-
 
   useEffect(() => {
     synth.current = new Tone.Synth().toDestination();
@@ -40,7 +39,7 @@ const App = () => {
     const loop = new Tone.Sequence(
       (time, i) => {
         synth.current.triggerAttackRelease(
-          tonality.freq( sequence[i] ),
+          tonality.freq(sequence[i]),
           0.1,
           time
         );
@@ -74,19 +73,19 @@ const App = () => {
   const handleUpdateSequence = (index, rotation) => {
     const newRotations = rotations.slice();
     const newSequence = sequence.slice();
-      newRotations[index] = rotation;
+    newRotations[index] = rotation;
     setRotations(newRotations);
-    for (let i = 1; i < newRotations.length; i++ ) {
-      newSequence[i] = newSequence[i-1] + newRotations[i];
+    for (let i = 1; i < newRotations.length; i++) {
+      newSequence[i] = newSequence[i - 1] + newRotations[i];
     }
     setSequence(newSequence);
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === " ") {
-      handleStopStart();
-    }
-  }
+  // const handleKeyDown = (e) => {
+  //   if (e.key === " ") {
+  //     handleStopStart();
+  //   }
+  // };
 
   return (
     <>
@@ -94,10 +93,8 @@ const App = () => {
         camera={{
           position: [0, 5, 10],
         }}
-        
       >
-        {/* <CameraControls target={[0, 0, 0]} /> */}
-        {/* <OrbitControls /> */}
+        <OrbitControls />
         <ambientLight />
         <directionalLight position={[-10, 20, 40]} />
         <directionalLight position={[2, -3, -4]} />
@@ -110,8 +107,12 @@ const App = () => {
           handleUpdateSequence={handleUpdateSequence}
         />
         <InfiniteGridHelper layers={1} color={new THREE.Color(0x00ccff)} />
-        <EffectComposer >
-        <Bloom luminanceThreshold={0.35} luminanceSmoothing={0.9} height={400} />
+        <EffectComposer>
+          <Bloom
+            luminanceThreshold={0.35}
+            luminanceSmoothing={0.9}
+            height={400}
+          />
         </EffectComposer>
       </Canvas>
       <div className="source">
