@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
+import { useSpring, animated } from "@react-spring/three";
 
 import * as Math from "mathjs";
 import SnakeSegment from "./SnakeSegment";
@@ -13,6 +14,19 @@ const Snake = ({
 }) => {
   const ref = useRef();
   const [rotation, setRotation] = useState(0);
+
+  const { color } = useSpring({
+    color:
+      seqPosition === index
+        ? (index % 2
+          ? "#00C000"
+          : "#C0C0C0")
+        : (index % 2
+          ? "#008000"
+          : "#808080"),
+  });
+
+  const AnimatedSnakeSegment = animated(SnakeSegment);
 
   useFrame(() => {
     if (ref.current.amountToAnimate > 0) {
@@ -40,18 +54,9 @@ const Snake = ({
     e.stopPropagation();
   };
 
-  const color =
-    seqPosition === index
-      ? index % 2
-        ? "#00C000"
-        : "#C0C0C0"
-      : index % 2
-      ? "#008000"
-      : "#808080";
-
   return (
     <group ref={ref} onClick={(e) => handleClick(e, ref)} {...props}>
-      <SnakeSegment color={color} />
+      <AnimatedSnakeSegment color={color} />
       <group rotation={[0, Math.pi, Math.pi / 2]}>
         {segments > 1 && (
           <Snake
