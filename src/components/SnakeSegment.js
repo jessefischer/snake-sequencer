@@ -8,14 +8,8 @@ const SnakeSegment = ({ color, ...props }) => {
   );
 };
 
-const TriangularPrism = ({ color, inverted = false, ...props }) => {
-  const triangle = inverted
-    ? new THREE.Shape([
-        new THREE.Vector2(0, 0),
-        new THREE.Vector2(0, 1),
-        new THREE.Vector2(1, 1),
-      ])
-    : new THREE.Shape([
+const TriangularPrism = ({ color, ...props }) => {
+  const triangle = new THREE.Shape([
         new THREE.Vector2(0, 0),
         new THREE.Vector2(1, 0),
         new THREE.Vector2(1, 1),
