@@ -31,9 +31,11 @@ const App = () => {
     synth.current = new Tone.Synth().toDestination();
   }, []);
 
-  // useEffect(() => {
-  //   window.addEventListener( "keydown", handleKeyDown );
-  // }, [playing]);
+  useEffect(() => {
+    window.addEventListener( "keydown", handleKeyDown );
+    return () => window.removeEventListener( "keydown", handleKeyDown );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playing]);
 
   useEffect(() => {
     const loop = new Tone.Sequence(
@@ -81,11 +83,11 @@ const App = () => {
     setSequence(newSequence);
   };
 
-  // const handleKeyDown = (e) => {
-  //   if (e.key === " ") {
-  //     handleStopStart();
-  //   }
-  // };
+  const handleKeyDown = (e) => {
+    if (e.key === " ") {
+      handleStopStart();
+    }
+  };
 
   return (
     <>
