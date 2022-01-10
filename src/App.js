@@ -3,29 +3,30 @@ import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import * as THREE from "three";
+import * as Tone from "tone";
 
-// import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import InfiniteGridHelper from "./lib/InfiniteGridHelper";
 import Tonality from "./lib/tonality";
 
 import "./App.css";
 
-import Snake from "./components/Snake";
+import { COLORS } from "./constants/constants";
 
-import * as Tone from "tone";
+import Snake from "./components/Snake";
 
 const App = () => {
   const [started, setStarted] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [bpm] = useState(120);
   const [root] = useState(60);
+  const [segments] = useState(16);
   const [tonality] = useState(Tonality.Pentatonic);
 
   const synth = useRef();
   const [index, setIndex] = useState(0);
 
-  const [rotations, setRotations] = useState(Array(16).fill(0));
-  const [sequence, setSequence] = useState(Array(16).fill(0));
+  const [rotations, setRotations] = useState(Array(segments).fill(0));
+  const [sequence, setSequence] = useState(Array(segments).fill(0));
 
   useEffect(() => {
     synth.current = new Tone.Synth().toDestination();
@@ -102,13 +103,13 @@ const App = () => {
         <directionalLight position={[2, -3, -4]} />
         <Snake
           position={[-Math.sqrt(2) * 3.5 - 0.5, Math.sqrt(2) / 4 + 4, 0]}
-          segments={16}
+          segments={segments}
           index={0}
           rotation={[Math.PI, 0, -Math.PI / 4]}
           seqPosition={index}
           handleUpdateSequence={handleUpdateSequence}
         />
-        <InfiniteGridHelper layers={1} color={new THREE.Color(0x00ccff)} />
+        <InfiniteGridHelper layers={1} color={new THREE.Color( COLORS.Cyan )} />
         <EffectComposer>
           <Bloom
             luminanceThreshold={0.35}
