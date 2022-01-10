@@ -1,52 +1,66 @@
-import React, { useState, useRef } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useState } from "react";
+import { useSpring, animated } from "@react-spring/three";
 
 import * as Math from "mathjs";
 import SnakeSegment from "./SnakeSegment";
 
-const Snake = ({ segments, index = 0, ...props }) => {
-  const ref = useRef();
+import { COLORS } from "../constants/constants"
+
+const Snake = ({
+  segments,
+  index = 0,
+  seqPosition,
+  handleUpdateSequence,
+  ...props
+}) => {
   const [rotation, setRotation] = useState(0);
 
-  useFrame(() => {
-      if ( ref.current.amountToAnimate > 0 ) {
-          ref.current.rotateY( Math.pi/20 );
-          ref.current.amountToAnimate -= Math.pi/20;
-      }
-      else if ( ref.current.amountToAnimate < 0) {
-        ref.current.rotateY( -Math.pi/20 );
-        ref.current.amountToAnimate += Math.pi/20;
+  const { animatedRotation } = useSpring({
+    animatedRotation: rotation * Math.pi / 2,
+    config: {
+      tension: 200,
+      friction: 23,
     }
+  })
+
+  const { color } = useSpring({
+    color:
+      seqPosition === index
+        ? (index % 2 ? COLORS.GreenActive : COLORS.OffWhiteActive )
+        : (index % 2 ? COLORS.Green : COLORS.OffWhite ),
   });
 
-  const handleClick = (e, r) => {
-      if ( !r.current.amountToAnimate || r.current.amountToAnimate !==0 ) {
+  const AnimatedSnakeSegment = animated(SnakeSegment);
 
-      if (e.shiftKey) {
-        r.current.amountToAnimate = -Math.pi / 2;
-        setRotation(((rotation - 1) + 4) % 4);
-
-      }
-      else {
-        r.current.amountToAnimate = Math.pi / 2;
-        //r.current.rotateY(Math.pi / 2); // 90 degrees
-        setRotation((rotation + 1) % 4);    
-      }
-
+  const handleClick = (e) => {
+    let newRotation = rotation;
+    newRotation += (e.shiftKey ? -1 : 1)
+    if ( newRotation < -1 ) {
+      newRotation += 4;
     }
-
+    if ( newRotation > 2 ) {
+      newRotation -= 4;
+    }
+    setRotation( newRotation );
+    handleUpdateSequence( index, newRotation );
     e.stopPropagation();
   };
 
   return (
-    <group ref={ref} onClick={(e) => handleClick(e, ref)} {...props}>
-      <SnakeSegment color={index % 2 ? "#008000" : "#808080"} />
+    <animated.group onClick={handleClick} rotation-y={animatedRotation} {...props}>
+      <AnimatedSnakeSegment color={color} />
       <group rotation={[0, Math.pi, Math.pi / 2]}>
         {segments > 1 && (
-          <Snake position={[0.5, 0.5, 0]} index={index + 1} segments={segments - 1} />
+          <Snake
+            position={[0.5, 0.5, 0]}
+            index={index + 1}
+            segments={segments - 1}
+            seqPosition={seqPosition}
+            handleUpdateSequence={handleUpdateSequence}
+          />
         )}
       </group>
-    </group>
+    </animated.group>
   );
 };
 

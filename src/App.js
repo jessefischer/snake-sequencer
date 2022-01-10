@@ -1,79 +1,132 @@
-import React, { useRef } from "react";
-import { Canvas, useFrame, useThree, extend } from "@react-three/fiber";
+import { useRef, useState, useEffect } from "react";
+import { Canvas } from "@react-three/fiber";
+import { OrbitControls } from "@react-three/drei";
+import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import * as THREE from "three";
+import * as Tone from "tone";
 
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import InfiniteGridHelper from "./lib/InfiniteGridHelper";
+import Tonality from "./lib/tonality";
 
 import "./App.css";
 
+import { COLORS } from "./constants/constants";
+
 import Snake from "./components/Snake";
-import SnakeSequencer from "./components/SnakeSequencer";
-// import Controls from "./components/Controls";
-
-import * as Math from "mathjs";
-
-extend({ OrbitControls });
-
-// const ICO_START_OPACITY = 0;
-// const RECT_START_OPACITY = 1;
-// const START_SPIN_SPEED = 0.5;
-
-// From https://codeworkshop.dev/blog/2020-04-03-adding-orbit-controls-to-react-three-fiber/
-const CameraControls = ({ target = [0, 0, 0] }) => {
-  const {
-    camera,
-    gl: { domElement },
-  } = useThree();
-  const controls = useRef();
-  useFrame(() => {
-    controls.current.update();
-  });
-  return (
-    <orbitControls ref={controls} args={[camera, domElement]} target={target} />
-  );
-};
 
 const App = () => {
-  // const [icoOpacity, setIcoOpacity] = useState(ICO_START_OPACITY);
-  // const [rectOpacity, setRectOpacity] = useState(RECT_START_OPACITY);
-  // const [spinSpeed, setSpinSpeed] = useState(START_SPIN_SPEED);
+  const [started, setStarted] = useState(false);
+  const [playing, setPlaying] = useState(false);
+  const [bpm] = useState(120);
+  const [root] = useState(60);
+  const [segments] = useState(16);
+  const [tonality] = useState(Tonality.Pentatonic);
 
-  // const handleUpdateControls = (e) => {
-  //   if (e.target.name === "icosahedronOpacity") {
-  //     setIcoOpacity(e.target.value);
-  //   }
-  //   if (e.target.name === "rectanglesOpacity") {
-  //     setRectOpacity(e.target.value);
-  //   }
-  //   if (e.target.name === "spinSpeed") {
-  //     setSpinSpeed(e.target.value);
-  //   }
-  // };
+  const synth = useRef();
+  const [index, setIndex] = useState(0);
+
+  const [rotations, setRotations] = useState(Array(segments).fill(0));
+  const [sequence, setSequence] = useState(Array(segments).fill(0));
+
+  useEffect(() => {
+    synth.current = new Tone.Synth().toDestination();
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener( "keydown", handleKeyDown );
+    return () => window.removeEventListener( "keydown", handleKeyDown );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playing]);
+
+  useEffect(() => {
+    const loop = new Tone.Sequence(
+      (time, i) => {
+        synth.current.triggerAttackRelease(
+          tonality.freq(sequence[i]),
+          0.1,
+          time
+        );
+        setIndex(i);
+      },
+      [...Array(sequence.length).keys()],
+      "8n"
+    );
+    loop.start(0);
+    return () => loop.dispose();
+  }, [sequence, root, tonality]);
+
+  useEffect(() => {
+    Tone.Transport.bpm.value = bpm;
+  }, [bpm]);
+
+  const handleStopStart = () => {
+    if (!started) {
+      setStarted(true);
+      Tone.start();
+    }
+    if (!playing) {
+      setPlaying(true);
+      Tone.Transport.start();
+    } else {
+      setPlaying(false);
+      Tone.Transport.stop();
+    }
+  };
+
+  const handleUpdateSequence = (index, rotation) => {
+    const newRotations = rotations.slice();
+    const newSequence = sequence.slice();
+    newRotations[index] = rotation;
+    setRotations(newRotations);
+    for (let i = 1; i < newRotations.length; i++) {
+      newSequence[i] = newSequence[i - 1] + newRotations[i];
+    }
+    setSequence(newSequence);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === " ") {
+      handleStopStart();
+    }
+  };
 
   return (
-    <SnakeSequencer>
+    <>
       <Canvas
         camera={{
-          position: [0,5, 10],
+          position: [0, 5, 10],
         }}
       >
-        <CameraControls target={[0, 0, 0]} />
+        <OrbitControls />
         <ambientLight />
         <directionalLight position={[-10, 20, 40]} />
         <directionalLight position={[2, -3, -4]} />
-        <Snake position={[-Math.sqrt(2)*3.5-0.5,Math.sqrt(2)/4 + 4,0]} segments={24} rotation={[Math.pi,0,-Math.pi/4]}/>
-        <InfiniteGridHelper color={new THREE.Color(0x00ccff)} />
-
+        <Snake
+          position={[-Math.sqrt(2) * 3.5 - 0.5, Math.sqrt(2) / 4 + 4, 0]}
+          segments={segments}
+          index={0}
+          rotation={[Math.PI, 0, -Math.PI / 4]}
+          seqPosition={index}
+          handleUpdateSequence={handleUpdateSequence}
+        />
+        <InfiniteGridHelper layers={1} color={new THREE.Color( COLORS.Cyan )} />
+        <EffectComposer>
+          <Bloom
+            luminanceThreshold={0.35}
+            luminanceSmoothing={0.9}
+            height={400}
+          />
+        </EffectComposer>
       </Canvas>
-
       <div className="source">
         <a href="https://github.com/jessefischer/rubiks-snake">
           Source / Credits
         </a>
       </div>
-
-    </SnakeSequencer>
+      <div className="controls" onClick={handleStopStart}>
+        {playing ? "stop" : "start"}
+      </div>
+    </>
   );
 };
 

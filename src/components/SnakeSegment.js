@@ -1,21 +1,9 @@
-import React, { useRef } from "react";
-
-// import * as Math from "mathjs";
 import * as THREE from "three";
 
-const SnakeSegment = ({ color, inverted = false, ...props }) => {
-  const ref = useRef();
-  // const [rotation, setRotation] = useState(0);
-
-  // const handleClick = (e) => {
-  //   ref.current.rotateY(Math.pi / 2); // 90 degrees
-  //   setRotation( (rotation + 1) % 4 );
-  //   e.stopPropagation();
-  // };
-
+const SnakeSegment = ({ color, ...props }) => {
   return (
-    <group ref={ref} {...props}>
-      <TriangularPrism position={[-0.5, 0, -0.5]} inverted={inverted} color={color} />
+    <group {...props}>
+      <TriangularPrism position={[-0.5, 0, -0.5]} color={color} />
     </group>
   );
 };

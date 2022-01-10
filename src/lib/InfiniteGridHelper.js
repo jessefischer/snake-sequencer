@@ -1,6 +1,12 @@
+import { useEffect } from "react";
+import { useThree } from "@react-three/fiber";
+
 import * as THREE from "three";
 
+// From https://github.com/Fyrestar/THREE.InfiniteGridHelper
+
 const InfiniteGridHelper = ({
+  layers = 0,
   size1 = 1,
   size2 = 10,
   color = new THREE.Color("white"),
@@ -8,6 +14,13 @@ const InfiniteGridHelper = ({
   axes = "xzy",
 }) => {
   const planeAxes = axes.substr(0, 2);
+
+  const { camera } = useThree();
+
+  useEffect(() => {
+    camera.layers.enable(0);
+    camera.layers.enable(1);
+  }, [camera.layers]);
 
   const VERTEX_SHADER = `
            
@@ -70,7 +83,7 @@ void main() {
 `;
 
   return (
-    <mesh>
+    <mesh layers={layers}>
       <shaderMaterial
         args={[
           {
