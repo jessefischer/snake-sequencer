@@ -4,6 +4,8 @@ import { useSpring, animated } from "@react-spring/three";
 import * as Math from "mathjs";
 import SnakeSegment from "./SnakeSegment";
 
+import { COLORS } from "../constants/constants"
+
 const Snake = ({
   segments,
   index = 0,
@@ -24,12 +26,8 @@ const Snake = ({
   const { color } = useSpring({
     color:
       seqPosition === index
-        ? (index % 2
-          ? "#00C000"
-          : "#C0C0C0")
-        : (index % 2
-          ? "#008000"
-          : "#808080"),
+        ? (index % 2 ? COLORS.GreenActive : COLORS.OffWhiteActive )
+        : (index % 2 ? COLORS.Green : COLORS.OffWhite ),
   });
 
   const AnimatedSnakeSegment = animated(SnakeSegment);
