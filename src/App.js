@@ -11,16 +11,20 @@ import Tonality from "./lib/tonality";
 import "./App.css";
 
 import { COLORS } from "./constants/constants";
+import { DEFAULTS } from "./constants/defaults";
 
 import Snake from "./components/Snake";
+import Controls from "./components/Controls";
 
 const App = () => {
   const [started, setStarted] = useState(false);
   const [playing, setPlaying] = useState(false);
-  const [bpm] = useState(120);
-  const [root] = useState(60);
-  const [segments] = useState(16);
-  const [tonality] = useState(Tonality.Pentatonic);
+
+  const [bpm, setBpm] = useState(DEFAULTS.bpm);
+  const [root, setRoot] = useState(DEFAULTS.bpm);
+  const [segments, setSegments] = useState(DEFAULTS.segments);
+  const [autorotate, setAutorotate] = useState(DEFAULTS.autorotate);
+  const [tonality, setTonality] = useState(Tonality.Pentatonic);
 
   const synth = useRef();
   const [index, setIndex] = useState(0);
@@ -33,9 +37,23 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    window.addEventListener( "keydown", handleKeyDown );
-    return () => window.removeEventListener( "keydown", handleKeyDown );
+    setRotations(
+      segments <= rotations.length
+        ? rotations.slice(0, segments)
+        : [...rotations, ...Array(segments - rotations.length).fill(0)]
+    );
+    setSequence(
+      segments <= sequence.length
+        ? sequence.slice(0, segments)
+        : [...sequence, ...Array(segments - sequence.length).fill(0)]
+    );
   // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [segments]);
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playing]);
 
   useEffect(() => {
@@ -90,14 +108,26 @@ const App = () => {
     }
   };
 
+  const handleUpdateControls = (e) => {
+    const setters = {
+      bpm: setBpm,
+      autorotate: setAutorotate,
+      segments: setSegments,
+      root: setRoot,
+      tonality: setTonality,
+    };
+    setters[e.target.name](e.target.value);
+  };
+
   return (
     <>
+    <div className='title'>Snake Sequencer</div>
       <Canvas
         camera={{
           position: [0, 5, 10],
         }}
       >
-        <OrbitControls />
+        <OrbitControls autoRotate autoRotateSpeed={autorotate}/>
         <ambientLight />
         <directionalLight position={[-10, 20, 40]} />
         <directionalLight position={[2, -3, -4]} />
@@ -109,7 +139,7 @@ const App = () => {
           seqPosition={index}
           handleUpdateSequence={handleUpdateSequence}
         />
-        <InfiniteGridHelper layers={1} color={new THREE.Color( COLORS.Cyan )} />
+        <InfiniteGridHelper layers={1} color={new THREE.Color(COLORS.Cyan)} />
         <EffectComposer>
           <Bloom
             luminanceThreshold={0.35}
@@ -118,13 +148,18 @@ const App = () => {
           />
         </EffectComposer>
       </Canvas>
+      <Controls
+        bpm={bpm}
+        autorotate={autorotate}
+        segments={segments}
+        playing={playing}
+        handleUpdateControls={handleUpdateControls}
+        handleStopStart={handleStopStart}
+      />
       <div className="source">
         <a href="https://github.com/jessefischer/rubiks-snake">
           Source / Credits
         </a>
-      </div>
-      <div className="controls" onClick={handleStopStart}>
-        {playing ? "stop" : "start"}
       </div>
     </>
   );
