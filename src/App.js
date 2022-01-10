@@ -158,8 +158,8 @@ const App = () => {
         handleStopStart={handleStopStart}
       />
       <div className="source">
-        <a href="https://github.com/jessefischer/rubiks-snake">
-          Source / Credits
+        <a href="https://github.com/jessefischer/snake-sequencer">
+          Source / About
         </a>
       </div>
     </>
