@@ -3,6 +3,8 @@ import { useThree } from "@react-three/fiber";
 
 import * as THREE from "three";
 
+// From https://github.com/Fyrestar/THREE.InfiniteGridHelper
+
 const InfiniteGridHelper = ({
   layers = 0,
   size1 = 1,
