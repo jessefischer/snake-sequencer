@@ -21,10 +21,10 @@ const App = () => {
   const [playing, setPlaying] = useState(false);
 
   const [bpm, setBpm] = useState(DEFAULTS.bpm);
-  const [root, setRoot] = useState(DEFAULTS.bpm);
+  const [root, setRoot] = useState(DEFAULTS.root);
   const [segments, setSegments] = useState(DEFAULTS.segments);
   const [autorotate, setAutorotate] = useState(DEFAULTS.autorotate);
-  const [tonality, setTonality] = useState(Tonality.Pentatonic);
+  const [tonality, setTonality] = useState(DEFAULTS.tonality);
 
   const synth = useRef();
   const [index, setIndex] = useState(0);
@@ -60,13 +60,13 @@ const App = () => {
     const loop = new Tone.Sequence(
       (time, i) => {
         synth.current.triggerAttackRelease(
-          tonality.freq(sequence[i]),
+          Tonality[tonality].setTonic(root).freq(sequence[i]),
           0.1,
           time
         );
         setIndex(i);
       },
-      [...Array(sequence.length).keys()],
+      [...Array(sequence.length).keys()], //[0...n]
       "8n"
     );
     loop.start(0);
@@ -114,7 +114,7 @@ const App = () => {
       autorotate: setAutorotate,
       segments: setSegments,
       root: setRoot,
-      tonality: setTonality,
+      tonality: setTonality, //(val) => setTonality( Tonality[val].setTonic(root)),
     };
     setters[e.target.name](e.target.value);
   };
@@ -153,6 +153,7 @@ const App = () => {
         autorotate={autorotate}
         segments={segments}
         playing={playing}
+        tonality={tonality}
         handleUpdateControls={handleUpdateControls}
         handleStopStart={handleStopStart}
       />

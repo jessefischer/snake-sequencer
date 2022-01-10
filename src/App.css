@@ -6,6 +6,7 @@ body {
   background-color: black;
 	font-family: 'Roboto Mono', monospace;
   font-size: 12px;
+  text-transform: lowercase;
 }
 
 .root {
@@ -46,7 +47,22 @@ canvas {
 }
 
 .controlsInner {
+  display: grid;
+  grid-template-columns: 2fr 150px 1fr;
+  grid-gap: 10px 15px;
+}
+
+.controlsInner label {
+  text-align: right;
+}
+
+.controlsInner div:nth-child(3n) {
   text-align: left;
+}
+
+.controlsInner select {
+  font: inherit;
+  text-align: center;
 }
 
 .stopStart {
@@ -67,12 +83,8 @@ canvas {
   transition: opacity 0.25s;
 }
 
-.controls label {
-    padding-left: 10px;
-}
-
-.controls input {
-  transform: translateY( 5px );
+.controls input, .controls select {
+  width: 100%;
 }
 
 .source {
