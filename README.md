@@ -8,7 +8,7 @@ The original idea for this project came to me last year as I uncovered a box of 
 
 ## Technology
 
-I bootstrapped the Snake Sequencer project with [Create React App](https://create-react-app.dev/). I then used [`@react-three/fiber`](https://docs.pmnd.rs/react-three-fiber/getting-started/introduction) as a declarative bridge to [`Three.js`](https://threejs.org/), along with [`drei`](https://drei.pmnd.rs/), a library of helpers for R3F, both from the open-source collective [Poimandres](https://github.com/pmndrs), and [`@react-spring/three`] for fluid and life-like animations. Finally, I used [`Tone.js`](https://tonejs.github.io/) to abstract some of the musical and time-based elements from the Web Audio toolkit.
+I bootstrapped the Snake Sequencer project with [Create React App](https://create-react-app.dev/). I then used [`@react-three/fiber`](https://docs.pmnd.rs/react-three-fiber/getting-started/introduction) as a declarative bridge to [`Three.js`](https://threejs.org/), along with [`drei`](https://drei.pmnd.rs/), a library of helpers for R3F, both from the open-source collective [Poimandres](https://github.com/pmndrs), and [`@react-spring/three`](https://www.npmjs.com/package/@react-spring/three) for fluid and life-like animations. Finally, I used [`Tone.js`](https://tonejs.github.io/) to abstract some of the musical and time-based elements from the Web Audio toolkit.
 
 ## How To Use
 
